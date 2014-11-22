@@ -8,14 +8,16 @@
  */
 class GeoJSON extends GeoAdapter
 {
-  /**
-   * Given an object or a string, return a Geometry
-   *
-   * @param mixed $input The GeoJSON string or object
-   *
-   * @return object Geometry
-   */
-  public function read($input) {
+    /**
+     * Given an object or a string, return a Geometry
+     *
+     * @param mixed $input The GeoJSON string or object
+     *
+     * @param array $properties
+     * @throws Exception
+     * @return object Geometry
+     */
+  public function read($input, $properties = []) {
     if (is_string($input)) {
       $input = json_decode($input);
     }
@@ -37,11 +39,13 @@ class GeoJSON extends GeoAdapter
 
     // Check to see if it's a Feature
     if ($input->type == 'Feature') {
-      return $this->read($input->geometry);
+      return $this->read($input->geometry, $input->properties);
     }
 
     // It's a geometry - process it
-    return $this->objToGeom($input);
+    $geometry = $this->objToGeom($input);
+    $geometry->properties = (array) $properties;
+    return $geometry;
   }
 
   private function objToGeom($obj) {
